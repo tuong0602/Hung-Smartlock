@@ -2150,3 +2150,15 @@
 
 </body>
 </html>
+# Run from the directory containing index.html and the JPG files.
+$ErrorActionPreference = 'Stop'
+$index = Join-Path (Get-Location) 'index.html'
+if (-not (Test-Path -LiteralPath $index)) { throw 'Khong tim thay index.html trong thu muc hien tai.' }
+$source = [System.IO.File]::ReadAllText($index, [System.Text.Encoding]::UTF8)
+$pattern = '(?<![A-Za-z0-9_./-])images/(?=hung-smartlock-[A-Za-z0-9_.-]+\.jpg)'
+$matches = [regex]::Matches($source, $pattern).Count
+if ($matches -eq 0) { Write-Host 'Khong tim thay duong dan images/ can sua. File co the da duoc sua.'; exit 0 }
+$target = [regex]::Replace($source, $pattern, './')
+Copy-Item -LiteralPath $index -Destination "$index.bak" -Force
+[System.IO.File]::WriteAllText($index, $target, (New-Object System.Text.UTF8Encoding($false)))
+Write-Host "Da sua $matches duong dan anh. Ban sao luu: index.html.bak"
